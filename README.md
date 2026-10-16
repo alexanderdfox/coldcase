@@ -36,3 +36,73 @@ cd coldcase
 
 # Run the application
 cargo run
+```
+
+On first run it will download dependencies and open a native window.
+
+---
+
+## How to Use
+
+1. In the left panel, paste a URL or click **Add file…** to select local `.txt` / `.md` files.
+2. Click **Analyze**.
+3. View results in the main panel:
+   - Scored Leads
+   - Extracted Entities
+   - Timeline
+   - Document summaries
+4. Click **Open output folder** to see the generated JSON files (`graph.json`, `leads.json`).
+
+---
+
+## Project Structure
+
+```
+coldcase/
+├── src/
+│   ├── main.rs          # Entry point
+│   ├── ui.rs            # egui GUI
+│   ├── model.rs         # Data structures
+│   ├── ingest.rs        # URL + file ingestion
+│   ├── extract.rs       # Entity extraction
+│   ├── graph.rs         # Knowledge graph
+│   ├── timeline.rs      # Timeline builder
+│   └── score.rs         # Lead scoring
+├── output/              # Generated results (gitignored)
+├── Cargo.toml
+└── README.md
+```
+
+---
+
+## Building a Release
+
+```bash
+cargo build --release
+```
+
+The binary will be at `target/release/coldcase`.
+
+---
+
+## Future Improvements
+
+- Better Named Entity Recognition (NLP models)
+- Semantic similarity / embeddings
+- Graph visualization
+- More source connectors (RSS, archive.org, etc.)
+- Entity resolution & deduplication
+- Session save/load
+
+---
+
+## License
+
+MIT (or your preferred license)
+
+---
+
+## Disclaimer
+
+This is an experimental research tool. Entity extraction is currently rule/regex-based and will produce false positives. Always verify findings manually. The authors assume no liability for misuse.
+```
