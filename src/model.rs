@@ -1,4 +1,3 @@
-// src/model.rs
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -38,7 +37,7 @@ pub struct Entity {
 pub struct Relation {
 	pub from: Uuid,
 	pub to: Uuid,
-	pub relation_type: String, // "mentioned_with", "located_at", "associated_with", etc.
+	pub relation_type: String,
 	pub strength: f32,
 	pub source_doc: Uuid,
 }
@@ -50,4 +49,12 @@ pub struct ScoredLead {
 	pub score: f32,
 	pub reasons: Vec<String>,
 	pub related_docs: Vec<Uuid>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TimelineEvent {
+	pub timestamp: Option<DateTime<Utc>>,
+	pub description: String,
+	pub source_doc: Uuid,
+	pub entities: Vec<String>,
 }

@@ -1,7 +1,6 @@
-// src/ingest.rs
 use anyhow::{anyhow, Result};
 use chrono::Utc;
-use reqwest::Client;
+use reqwest::blocking::Client;
 use scraper::{Html, Selector};
 use uuid::Uuid;
 
@@ -15,28 +14,28 @@ impl Ingestor {
 	pub fn new() -> Self {
 		Self {
 			client: Client::builder()
-				.user_agent("OSINT-ColdCase-Research/0.1 (educational; respect robots.txt)")
-				.timeout(std::time::Duration::from_secs(30))
+				.user_agent("OSINT-ColdCase-Research/0.1 (educational)")
+				.timeout(std::time::Duration::from_secs(25))
 				.build()
 				.expect("Failed to build HTTP client"),
 		}
 	}
 
-	pub async fn ingest(&self, source: &str) -> Result<CaseDocument> {
+	pub fn ingest(&self, source: &str) -> Result<CaseDocument> {
 		if source.starts_with("http://") || source.starts_with("https://") {
-			self.ingest_url(source).await
+			self.ingest_url(source)
 		} else {
 			self.ingest_file(source)
 		}
 	}
 
-	async fn ingest_url(&self, url: &str) -> Result<CaseDocument> {
-		let resp = self.client.get(url).send().await?;
+	fn ingest_url(&self, url: &str) -> Result<CaseDocument> {
+		let resp = self.client.get(url).send()?;
 		if !resp.status().is_success() {
 			return Err(anyhow!("HTTP {}", resp.status()));
 		}
 
-		let html = resp.text().await?;
+		let html = resp.text()?;
 		let document = Html::parse_document(&html);
 
 		let title = document
@@ -45,8 +44,7 @@ impl Ingestor {
 			.map(|t| t.text().collect::<String>())
 			.unwrap_or_else(|| url.to_string());
 
-		// Very basic content extraction — improve with readability algorithms later
-		let body_selector = Selector::parse("article, main, .content, body").unwrap();
+		let body_selector = Selector::parse("article, main, .content, .post, body").unwrap();
 		let content: String = document
 			.select(&body_selector)
 			.flat_map(|el| el.text())
@@ -61,7 +59,7 @@ impl Ingestor {
 			title: title.trim().to_string(),
 			source_url: Some(url.to_string()),
 			content,
-			published_at: None, // could parse <time> or meta tags
+			published_at: None,
 			retrieved_at: Utc::now(),
 		})
 	}
